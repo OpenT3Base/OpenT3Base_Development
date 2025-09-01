@@ -1,0 +1,101 @@
+{
+  "name": "opent3base",
+  "version": "0.1.0",
+  "description": "Next-generation, open-source, modular enterprise platform for complete business lifecycle management",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:setup && npm run dev:modules",
+    "dev:setup": "echo 'Setting up development environment...'",
+    "dev:modules": "npm run dev:plm & npm run dev:mrp",
+    "dev:plm": "cd modules/plm && npm run dev",
+    "dev:mrp": "cd modules/mrp && npm run dev",
+    "build": "npm run build:modules",
+    "build:modules": "npm run build:plm && npm run build:mrp",
+    "build:plm": "cd modules/plm && npm run build",
+    "build:mrp": "cd modules/mrp && npm run build",
+    "test": "npm run test:modules",
+    "test:modules": "npm run test:plm && npm run test:mrp",
+    "test:plm": "cd modules/plm && npm test",
+    "test:mrp": "cd modules/mrp && npm test",
+    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docs": "npm run docs:build",
+    "docs:build": "echo 'Building documentation...'",
+    "docs:dev": "echo 'Starting documentation development server...'",
+    "setup": "npm run setup:modules",
+    "setup:modules": "npm run setup:plm && npm run setup:mrp",
+    "setup:plm": "cd modules/plm && npm install",
+    "setup:mrp": "cd modules/mrp && npm install",
+    "clean": "npm run clean:modules && rm -rf node_modules",
+    "clean:modules": "npm run clean:plm && npm run clean:mrp",
+    "clean:plm": "cd modules/plm && rm -rf node_modules dist",
+    "clean:mrp": "cd modules/mrp && rm -rf node_modules dist"
+  },
+  "keywords": [
+    "enterprise",
+    "erp",
+    "plm",
+    "mrp",
+    "scm",
+    "mes",
+    "crm",
+    "business-intelligence",
+    "modular",
+    "open-source",
+    "monorepo",
+    "microservices",
+    "api-first",
+    "manufacturing",
+    "supply-chain",
+    "project-management"
+  ],
+  "author": "OpenT3Base Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenT3Base/OpenT3Base.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OpenT3Base/OpenT3Base/issues"
+  },
+  "homepage": "https://opent3base.org",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "modules/*",
+    "shared/*",
+    "tools/*"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
+    }
+  }
+}
