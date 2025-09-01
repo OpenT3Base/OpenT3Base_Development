@@ -89,4 +89,20 @@ OpenT3Base is designed to be future-proof and adaptable. Consider these optional
 
 **These optional modules can be added as the project evolves or as specific business requirements emerge. They ensure OpenT3Base remains at the forefront of enterprise technology and adaptable to new challenges.**
 
+## Developer Tools
+
+### Module Creation Tool
+
+OpenT3Base includes an automated module creation tool to help developers quickly scaffold new modules with consistent structure and best practices:
+
+```bash
+# Interactive mode
+./tools/create-module.sh --interactive
+
+# Command line mode
+./tools/create-module.sh --name YourModule --description "Your Module Description" --tech typescript
+```
+
+For detailed instructions, see the [Module Creation Guide](../docs/MODULE_CREATION.md).
+
 ---

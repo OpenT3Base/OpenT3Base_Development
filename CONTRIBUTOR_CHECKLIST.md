@@ -22,6 +22,7 @@ Welcome! Before submitting a pull request or feature proposal, please review thi
 - [ ] Include/Update module-level README or relevant documentation
 - [ ] Add/Update tests and ensure 100% pass rate
 - [ ] Use or extend existing APIs where possible
+- [ ] If creating a new module, consider using the [Module Creation Tool](docs/MODULE_CREATION.md)
 
 ## 4. Internationalization & Accessibility
 
