@@ -1,0 +1,159 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Repository
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check for required files
+      run: |
+        echo "Checking for required files..."
+        required_files=(
+          "CONTRIBUTOR_CHECKLIST.md"
+          "SECURITY.md"
+          "docs/README.md"
+          "docs/architecture-diagram.md"
+        )
+        
+        for file in "${required_files[@]}"; do
+          if [[ ! -f "$file" ]]; then
+            echo "❌ Required file missing: $file"
+            exit 1
+          else
+            echo "✅ Found: $file"
+          fi
+        done
+    
+    - name: Validate documentation structure
+      run: |
+        echo "Validating documentation structure..."
+        
+        # Check that modules directory exists and has content
+        if [[ ! -d "modules" ]]; then
+          echo "❌ modules directory missing"
+          exit 1
+        fi
+        
+        # Check for module README files
+        module_count=$(find modules -name "README.md" | wc -l)
+        if [[ $module_count -eq 0 ]]; then
+          echo "❌ No module README files found"
+          exit 1
+        fi
+        
+        echo "✅ Found $module_count module README files"
+    
+    - name: Check commit message format
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Checking commit message format..."
+        # Get the commit messages from the PR
+        git log --format=%s origin/main..HEAD | while read -r msg; do
+          # Check if commit message follows conventional format or is descriptive
+          if [[ ${#msg} -lt 10 ]]; then
+            echo "❌ Commit message too short: '$msg'"
+            echo "Commit messages should be descriptive (at least 10 characters)"
+            exit 1
+          fi
+          echo "✅ Commit message OK: '$msg'"
+        done
+    
+    - name: Validate Markdown files
+      run: |
+        echo "Validating Markdown files..."
+        # Basic validation - check for broken links in markdown files
+        find . -name "*.md" -not -path "./.git/*" | while read -r file; do
+          echo "Checking $file..."
+          # Check for basic markdown syntax issues
+          if grep -q "]()" "$file"; then
+            echo "❌ Found empty links in $file"
+            exit 1
+          fi
+        done
+        echo "✅ Markdown validation passed"
+
+  linear-history:
+    runs-on: ubuntu-latest
+    name: Check Linear History
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check for merge commits
+      run: |
+        echo "Checking for merge commits in PR..."
+        merge_commits=$(git log --merges origin/main..HEAD --oneline)
+        if [[ -n "$merge_commits" ]]; then
+          echo "❌ Merge commits found in PR. Please rebase to maintain linear history:"
+          echo "$merge_commits"
+          exit 1
+        fi
+        echo "✅ No merge commits found - linear history maintained"
+
+  security-check:
+    runs-on: ubuntu-latest
+    name: Security Check
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check for secrets in files
+      run: |
+        echo "Scanning for potential secrets..."
+        
+        # Check for various secret patterns
+        found_secrets=false
+        
+        # Check for password patterns
+        if grep -r -i -E "password\s*=\s*['\"][^'\"]+['\"]" . --exclude-dir=.git --exclude="*.yml" --exclude="*.yaml" --exclude="*.md"; then
+          echo "❌ Potential password found"
+          found_secrets=true
+        fi
+        
+        # Check for API key patterns
+        if grep -r -i -E "api_key\s*=\s*['\"][^'\"]+['\"]" . --exclude-dir=.git --exclude="*.yml" --exclude="*.yaml" --exclude="*.md"; then
+          echo "❌ Potential API key found"
+          found_secrets=true
+        fi
+        
+        # Check for secret patterns
+        if grep -r -i -E "secret\s*=\s*['\"][^'\"]+['\"]" . --exclude-dir=.git --exclude="*.yml" --exclude="*.yaml" --exclude="*.md"; then
+          echo "❌ Potential secret found"
+          found_secrets=true
+        fi
+        
+        # Check for token patterns
+        if grep -r -i -E "token\s*=\s*['\"][^'\"]+['\"]" . --exclude-dir=.git --exclude="*.yml" --exclude="*.yaml" --exclude="*.md"; then
+          echo "❌ Potential token found"
+          found_secrets=true
+        fi
+        
+        # Check for private keys
+        if grep -r -- "-----BEGIN PRIVATE KEY-----" . --exclude-dir=.git; then
+          echo "❌ Private key found"
+          found_secrets=true
+        fi
+        
+        if grep -r -- "-----BEGIN RSA PRIVATE KEY-----" . --exclude-dir=.git; then
+          echo "❌ RSA private key found"
+          found_secrets=true
+        fi
+        
+        if [[ "$found_secrets" == "true" ]]; then
+          echo "❌ Security check failed - potential secrets found"
+          exit 1
+        fi
+        
+        echo "✅ No secrets detected"

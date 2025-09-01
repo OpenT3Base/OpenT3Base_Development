@@ -51,6 +51,9 @@ Welcome! Before submitting a pull request or feature proposal, please review thi
 - [ ] Run all relevant unit and integration tests
 - [ ] Verify successful build in CI/CD pipeline
 - [ ] Check for regressions or breaking changes
+- [ ] Ensure all required status checks pass (validate, linear-history, security-check)
+- [ ] Verify linear commit history (no merge commits)
+- [ ] Follow branch protection requirements outlined in [SECURITY.md](SECURITY.md)
 
 ## 9. Licensing & Credits
 
